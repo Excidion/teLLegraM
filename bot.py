@@ -41,12 +41,14 @@ def main():
 async def chat(update, context):
     await update.message.reply_chat_action("typing")
     client = context.user_data.get("client")
-    response = get_reply(client=client, text=update.message.text)
+    if client is None:
+        await update.message.reply_text(
+            "You are not connected to an LLM. Please /connect first."
+        )
+        return
+    response = client.chat(update.message.text, echo="none", stream=False)
+    response = str(response)
     await update.message.reply_markdown(response)
-
-
-def get_reply(client, text):
-    return str(client.chat(text, echo="none"))
 
 
 def add_registraion(app):
